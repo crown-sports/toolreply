@@ -10,8 +10,26 @@ It runs offline, needs no API key, has no runtime dependencies, and never execut
 Use it in regression tests, when debugging an exporter, or before replaying a recorded conversation.
 
 [Quick start](#try-the-broken-and-fixed-examples) · [中文说明](docs/README.zh-CN.md) ·
-[Rules and scope](docs/rules.md) · [GitHub Action](docs/action.md) ·
+[Rules and scope](docs/rules.md) · [Marketplace](https://github.com/marketplace/actions/toolreply) · [Action guide](docs/action.md) ·
 [LangChain/LangGraph recipe](docs/langchain.md) · [Contributing](CONTRIBUTING.md)
+
+## Add to GitHub Actions
+
+After `actions/checkout`, check saved regression fixtures with this step:
+
+```yaml
+- uses: crown-sports/toolreply@v0.2.0
+  with:
+    files: tests/fixtures/openai/**/*.json
+    format: openai-chat
+    warnings-as-errors: "true"
+```
+
+Replace the path with your fixtures. Broken lifecycles fail the job; a JSON report remains
+available on failure. [Complete workflow, outputs and optional report upload](docs/action.md).
+Use a reviewed release's full commit SHA for an immutable pin. The Action is available on
+[GitHub Marketplace](https://github.com/marketplace/actions/toolreply) and is tested on Linux,
+Windows and macOS. Version 0.2.0 is a preview.
 
 ## Try the broken and fixed examples
 
@@ -94,20 +112,8 @@ transcript suitable to send to a provider.
 | `1` | Errors found, or warnings with `--warnings-as-errors` |
 | `2` | Bad command, unreadable input, unsupported envelope, invalid JSON, or input over 16 MiB |
 
-For GitHub Actions, check saved fixtures without an installation step:
-
-```yaml
-# After actions/checkout:
-- uses: crown-sports/toolreply@v0.2.0
-  with:
-    files: tests/fixtures/openai/**/*.json
-    format: openai-chat
-    warnings-as-errors: "true"
-```
-
-The [Action guide](docs/action.md) covers multiple files, failed-check reports, optional artifact
-upload and a complete workflow. Use a reviewed release's full commit SHA for an immutable pin.
-Other CI systems can install the package and run the same `toolreply check` command.
+The [GitHub Action above](#add-to-github-actions) uses the same checks. Other CI systems can
+install the package and run `toolreply check` directly.
 
 For an artifact, use `--output json > toolreply-report.json`. Reports include counts, stable
 diagnostic codes, severities, and source locations. They omit tool names, IDs, argument values,

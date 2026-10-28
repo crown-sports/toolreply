@@ -6,6 +6,8 @@ toolreply 会定位重复结果和缺失结果，帮助你在回放记录或运�
 这是本地 Python 命令行工具，不调用模型、不执行工具、不上传对话，没有运行时第三方依赖。
 它检查记录里的配对和顺序，不证明工具执行成功或回答正确。
 
+[GitHub Marketplace](https://github.com/marketplace/actions/toolreply) · [Action 使用说明](action.zh-CN.md)
+
 ## 试用
 
 需要 Python 3.10 及以上。克隆仓库后：
