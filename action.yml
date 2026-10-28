@@ -1,0 +1,56 @@
+name: toolreply
+description: Check saved tool-call histories for broken call/result lifecycles.
+author: crown-sports
+
+inputs:
+  files:
+    description: Newline-separated workspace-relative file paths or glob patterns; each must match.
+    required: true
+  format:
+    description: Recorded provider format, either openai-chat or anthropic.
+    required: true
+  allow-pending-tail:
+    description: Allow unresolved calls only in the final unfinished batch (true or false).
+    default: "false"
+  warnings-as-errors:
+    description: Fail on warnings as well as errors (true or false).
+    default: "false"
+
+outputs:
+  report-path:
+    description: Absolute path to the JSON report, including when checks fail.
+    value: ${{ steps.check.outputs.report-path }}
+  files:
+    description: Number of distinct files checked.
+    value: ${{ steps.check.outputs.files }}
+  errors:
+    description: Number of lifecycle errors.
+    value: ${{ steps.check.outputs.errors }}
+  warnings:
+    description: Number of lifecycle warnings.
+    value: ${{ steps.check.outputs.warnings }}
+  input-errors:
+    description: Number of input or configuration errors.
+    value: ${{ steps.check.outputs.input-errors }}
+
+runs:
+  using: composite
+  steps:
+    - name: Set up the action's Python
+      id: python
+      uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+      with:
+        python-version: "3.12"
+        update-environment: false
+    - name: Check recorded histories
+      id: check
+      shell: bash
+      working-directory: ${{ runner.temp }}
+      env:
+        TOOLREPLY_PYTHON: ${{ steps.python.outputs.python-path }}
+        TOOLREPLY_ACTION_PATH: ${{ github.action_path }}
+        TOOLREPLY_FILES: ${{ inputs.files }}
+        TOOLREPLY_FORMAT: ${{ inputs.format }}
+        TOOLREPLY_ALLOW_PENDING_TAIL: ${{ inputs.allow-pending-tail }}
+        TOOLREPLY_WARNINGS_AS_ERRORS: ${{ inputs.warnings-as-errors }}
+      run: '"$TOOLREPLY_PYTHON" -I -S "$TOOLREPLY_ACTION_PATH/scripts/run_action.py"'

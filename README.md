@@ -10,7 +10,8 @@ It runs offline, needs no API key, has no runtime dependencies, and never execut
 Use it in regression tests, when debugging an exporter, or before replaying a recorded conversation.
 
 [Quick start](#try-the-broken-and-fixed-examples) · [中文说明](docs/README.zh-CN.md) ·
-[Rules and scope](docs/rules.md) · [LangChain/LangGraph recipe](docs/langchain.md) · [Contributing](CONTRIBUTING.md)
+[Rules and scope](docs/rules.md) · [GitHub Action](docs/action.md) ·
+[LangChain/LangGraph recipe](docs/langchain.md) · [Contributing](CONTRIBUTING.md)
 
 ## Try the broken and fixed examples
 
@@ -47,7 +48,7 @@ The examples are synthetic and do not call an API. The result says the checked l
 pass; it does not prove the stock numbers or final answer are correct.
 
 You can also install the wheel from [Releases](https://github.com/crown-sports/toolreply/releases)
-with `python -m pip install /path/to/toolreply-0.1.0-py3-none-any.whl`.
+with `python -m pip install /path/to/toolreply-0.2.0-py3-none-any.whl`.
 The package is not currently published on PyPI.
 
 ## Check your own history
@@ -93,10 +94,20 @@ transcript suitable to send to a provider.
 | `1` | Errors found, or warnings with `--warnings-as-errors` |
 | `2` | Bad command, unreadable input, unsupported envelope, invalid JSON, or input over 16 MiB |
 
+For GitHub Actions, check saved fixtures without an installation step:
+
 ```yaml
-# After installing toolreply in your CI environment:
-- run: toolreply check tests/fixtures/conversation.json --format openai-chat --warnings-as-errors
+# After actions/checkout:
+- uses: crown-sports/toolreply@v0.2.0
+  with:
+    files: tests/fixtures/openai/**/*.json
+    format: openai-chat
+    warnings-as-errors: "true"
 ```
+
+The [Action guide](docs/action.md) covers multiple files, failed-check reports, optional artifact
+upload and a complete workflow. Use a reviewed release's full commit SHA for an immutable pin.
+Other CI systems can install the package and run the same `toolreply check` command.
 
 For an artifact, use `--output json > toolreply-report.json`. Reports include counts, stable
 diagnostic codes, severities, and source locations. They omit tool names, IDs, argument values,

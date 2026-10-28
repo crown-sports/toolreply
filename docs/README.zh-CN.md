@@ -47,6 +47,21 @@ toolreply check history.json --format anthropic
 报告只包含统计、诊断代码和 JSON Pointer 位置，不输出原始工具名、ID、参数或结果内容。
 原始文件不会被修改，也不会被自动脱敏。
 
+## 在 GitHub Actions 中检查回归样本
+
+无需手动安装 toolreply；检出仓库后加入：
+
+```yaml
+- uses: crown-sports/toolreply@v0.2.0
+  with:
+    files: tests/fixtures/openai/**/*.json
+    format: openai-chat
+    warnings-as-errors: "true"
+```
+
+支持多行路径/glob；每个模式必须匹配文件，检查失败仍生成 JSON 报告。完整工作流、参数、
+可选报告上传和本地复现见 [Action 使用说明](action.zh-CN.md)。需要固定依赖时使用发布版本的完整 commit SHA。
+
 ## 已知边界
 
 当前不支持 Responses API、流式片段、旧版 function_call、Anthropic 服务端工具或程序化调用。

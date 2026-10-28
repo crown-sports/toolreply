@@ -1,0 +1,98 @@
+name: action smoke
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  action:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - name: Exercise filename, path, privacy and import boundaries
+        run: python -m unittest discover -s tests -p test_action.py -v
+      - name: Prepare synthetic fixture copies
+        shell: python
+        run: |
+          from pathlib import Path
+          directory = Path("build/action-smoke")
+          directory.mkdir(parents=True, exist_ok=True)
+          (directory / "good copy.json").write_bytes(Path("examples/openai-fixed.json").read_bytes())
+          (directory / "invalid.json").write_text('{"SECRET_PAYLOAD":"private",}', encoding="utf-8")
+      - id: clean
+        uses: ./
+        with:
+          files: |
+            examples/openai-fixed.json
+            build/action-smoke/good copy.json
+            examples/openai-fixed*.json
+          format: openai-chat
+          warnings-as-errors: "true"
+      - id: broken
+        uses: ./
+        continue-on-error: true
+        with:
+          files: examples/openai-broken.json
+          format: openai-chat
+      - id: pending
+        uses: ./
+        with:
+          files: examples/anthropic-pending.json
+          format: anthropic
+          allow-pending-tail: "true"
+      - id: strict
+        uses: ./
+        continue-on-error: true
+        with:
+          files: examples/anthropic-pending.json
+          format: anthropic
+          allow-pending-tail: "true"
+          warnings-as-errors: "true"
+      - id: invalid
+        uses: ./
+        continue-on-error: true
+        with:
+          files: build/action-smoke/invalid.json
+          format: openai-chat
+      - name: Verify real action outcomes and reports, including failed steps
+        if: always()
+        shell: python
+        env:
+          TOOLREPLY_STEPS: ${{ toJSON(steps) }}
+        run: |
+          import json
+          import os
+          from pathlib import Path
+          steps = json.loads(os.environ["TOOLREPLY_STEPS"])
+          expected = {"clean": "success", "broken": "failure", "pending": "success",
+                      "strict": "failure", "invalid": "failure"}
+          reports = {}
+          paths = set()
+          for name, outcome in expected.items():
+              step = steps[name]
+              assert step["outcome"] == outcome, (name, step["outcome"])
+              path = Path(step["outputs"]["report-path"])
+              paths.add(path)
+              reports[name] = json.loads(path.read_text(encoding="utf-8"))
+              for key in ("files", "errors", "warnings", "input_errors"):
+                  assert int(step["outputs"][key.replace("_", "-")]) == reports[name]["summary"][key]
+          assert len(paths) == 5
+          assert reports["clean"]["summary"]["files"] == 2
+          assert reports["clean"]["summary"]["errors"] == 0
+          assert reports["broken"]["summary"]["errors"] == 2
+          assert reports["pending"]["summary"]["warnings"] > 0
+          assert reports["strict"]["files"][0]["exit_code"] == 1
+          assert reports["invalid"]["files"][0]["exit_code"] == 2
+          assert reports["invalid"]["summary"]["input_errors"] == 1
+          assert "SECRET_PAYLOAD" not in json.dumps(reports)
