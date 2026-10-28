@@ -10,7 +10,7 @@ It runs offline, needs no API key, has no runtime dependencies, and never execut
 Use it in regression tests, when debugging an exporter, or before replaying a recorded conversation.
 
 [Quick start](#try-the-broken-and-fixed-examples) · [中文说明](docs/README.zh-CN.md) ·
-[Rules and scope](docs/rules.md) · [Contributing](CONTRIBUTING.md)
+[Rules and scope](docs/rules.md) · [LangChain/LangGraph recipe](docs/langchain.md) · [Contributing](CONTRIBUTING.md)
 
 ## Try the broken and fixed examples
 
