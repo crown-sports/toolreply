@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "toolreply"
+version = "0.1.0"
+description = "Offline linting for tool-call and result lifecycles in recorded LLM conversations."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{name = "crown-sports"}]
+keywords = ["tool-calling", "agents", "lint", "conversation", "validation"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Console",
+  "Programming Language :: Python :: 3",
+  "Topic :: Software Development :: Quality Assurance",
+]
+
+[project.urls]
+Repository = "https://github.com/crown-sports/toolreply"
+Issues = "https://github.com/crown-sports/toolreply/issues"
+
+[project.scripts]
+toolreply = "toolreply.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]

@@ -1,0 +1,12 @@
+{
+  "messages": [
+    {"role": "user", "content": "Compare stock for the same item in two warehouses."},
+    {"role": "assistant", "tool_calls": [
+      {"id": "call_north", "type": "function", "function": {"name": "stock", "arguments": "{\"warehouse\":\"north\",\"sku\":\"A17\"}"}},
+      {"id": "call_south", "type": "function", "function": {"name": "stock", "arguments": "{\"warehouse\":\"south\",\"sku\":\"A17\"}"}}
+    ]},
+    {"role": "tool", "tool_call_id": "call_north", "content": "{\"available\":12}"},
+    {"role": "tool", "tool_call_id": "call_south", "content": "{\"available\":8}"},
+    {"role": "assistant", "content": "There are 20 units available."}
+  ]
+}

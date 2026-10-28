@@ -1,0 +1,12 @@
+[
+  {"role": "user", "content": "Fetch the release and deployment status."},
+  {"role": "assistant", "content": [
+    {"type": "tool_use", "id": "toolu_release", "name": "release_status", "input": {}},
+    {"type": "tool_use", "id": "toolu_deploy", "name": "deployment_status", "input": {}}
+  ]},
+  {"role": "user", "content": [
+    {"type": "text", "text": "Here are the results."},
+    {"type": "tool_result", "tool_use_id": "toolu_release", "content": "published"},
+    {"type": "tool_result", "tool_use_id": "toolu_deploy", "content": "healthy"}
+  ]}
+]
